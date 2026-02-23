@@ -1,16 +1,17 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import os
+import streamlit as st
 
 
 def send_otp_email(to_email, otp):
-    sender = os.getenv("EMAIL_ADDRESS")
-    password = os.getenv("EMAIL_PASSWORD")
+
+    # Read from Streamlit secrets (Cloud-safe)
+    sender = st.secrets["EMAIL_ADDRESS"]
+    password = st.secrets["EMAIL_PASSWORD"]
 
     subject = "Your Login OTP - MLStack Architect"
 
-    # Professional HTML Email Body
     html_body = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
@@ -47,7 +48,6 @@ def send_otp_email(to_email, otp):
     msg["Subject"] = subject
     msg["From"] = sender
     msg["To"] = to_email
-
     msg.attach(MIMEText(html_body, "html"))
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
