@@ -1,0 +1,12 @@
+# 1.Create folder structure
+# 2.Venv and activated
+# 3.Installed requirements and then pip freeze > requirements.txt
+# 4.Steup env variables = GEMINI_API_KEY
+# 5.Config.py
+# 6.Services/gemini_service.py
+# 7.utils/logger.py
+# 8.test_geminy.py for testing api works or not
+# 9.Database tables 
+# 10.got error then initialized __init__.py files in folders
+# 11.test_user-repo.py for testing
+# 12. auth\otp_serrvice.py
