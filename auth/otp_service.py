@@ -1,34 +1,43 @@
 import random
 import time
-
-# In-memory OTP store (temporary for development)
-otp_store = {}
+import streamlit as st
 
 
-def generate_otp(email: str) -> str:
-    otp = str(random.randint(100000, 999999))
+import random
 
-    otp_store[email] = {
-        "otp": otp,
-        "timestamp": time.time()
-    }
-
-    return otp
+def generate_otp():
+    return str(random.randint(100000, 999999))
 
 
 def validate_otp(email: str, entered_otp: str) -> bool:
-    record = otp_store.get(email)
+    """
+    Validate OTP from session state.
+    """
 
-    if not record:
+    otp_data = st.session_state.get("otp_data")
+
+    print("Stored OTP Data:", otp_data)  # DEBUG
+    print("Entered OTP:", entered_otp)   # DEBUG
+
+    if not otp_data:
+        print("No OTP data found in session.")
         return False
 
-    # OTP valid for 5 minutes
-    if time.time() - record["timestamp"] > 300:
-        del otp_store[email]
+    if otp_data["email"] != email:
+        print("Email mismatch.")
         return False
 
-    if record["otp"] == entered_otp:
-        del otp_store[email]
-        return True
+    if time.time() > otp_data["expires"]:
+        print("OTP expired.")
+        st.session_state.pop("otp_data", None)
+        return False
 
-    return False
+    if otp_data["otp"] != entered_otp:
+        print("OTP mismatch.")
+        return False
+
+    # Successful validation → remove OTP
+    st.session_state.pop("otp_data", None)
+    print("OTP validated successfully.")
+
+    return True

@@ -67,3 +67,6 @@
 2026-02-23 18:36:14,238 - ERROR - Gemini API error: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'Please use a valid role: user, model.', 'status': 'INVALID_ARGUMENT'}}
 2026-02-23 18:36:20,967 - INFO - Calling Gemini API
 2026-02-23 18:36:21,922 - ERROR - Gemini API error: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'Please use a valid role: user, model.', 'status': 'INVALID_ARGUMENT'}}
+2026-02-23 19:16:12,603 - INFO - Response time: 1.03 seconds
+2026-02-23 19:32:18,617 - INFO - Response time: 1.79 seconds
+2026-02-23 19:35:16,347 - INFO - Response time: 1.03 seconds

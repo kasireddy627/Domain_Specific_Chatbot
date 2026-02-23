@@ -1,5 +1,13 @@
 import streamlit as st
 import uuid
+from dotenv import load_dotenv
+from database.init_db import init_db
+
+# Load environment variables (for local testing)
+load_dotenv()
+
+# Ensure DB tables exist
+init_db()
 
 from auth.auth_controller import request_otp, verify_otp_and_login
 from services.conversation_service import handle_user_message
@@ -10,7 +18,7 @@ from services.memory_service import (
 )
 
 st.set_page_config(
-    page_title="Full Stack Data Science AI Mentor",
+    page_title="MLStack Architect",
     layout="wide"
 )
 
@@ -22,7 +30,7 @@ defaults = {
     "user": None,
     "current_chat_id": None,
     "messages": [],
-    "generated_otp": None,
+    "otp_sent": False,
 }
 
 for key, value in defaults.items():
@@ -31,27 +39,31 @@ for key, value in defaults.items():
 
 
 # ==========================
-# LOGIN PAGE (HOME)
+# LOGIN PAGE
 # ==========================
 def login_ui():
-    st.markdown("# Full Stack Data Science AI Mentor")
-    st.markdown("### Intelligent AI Mentor for ML, DL & MLOps")
+    st.title("MLStack Architect")
+    st.caption("Production-Ready Full Stack GenAI System")
     st.markdown("---")
 
     name = st.text_input("Name")
     email = st.text_input("Email")
 
     if st.button("Request OTP"):
+        if not name or not email:
+            st.warning("Please enter both name and email.")
+            return
+
         response = request_otp(name, email)
 
         if response["success"]:
-            st.session_state.generated_otp = response["otp"]
-            st.success("OTP Sent")
-            st.info(f"DEV OTP: {response['otp']}")
+            st.session_state.otp_sent = True
+            st.success("OTP sent to your email.")
         else:
-            st.error(response["message"])
+            st.error(response.get("message", "Failed to send OTP."))
 
-    if st.session_state.generated_otp:
+    # Show OTP input only after sending
+    if st.session_state.otp_sent:
         entered_otp = st.text_input("Enter OTP")
 
         if st.button("Verify"):
@@ -60,10 +72,10 @@ def login_ui():
             if login_response["success"]:
                 st.session_state.authenticated = True
                 st.session_state.user = login_response
-                st.session_state.generated_otp = None
+                st.session_state.otp_sent = False
                 st.rerun()
             else:
-                st.error(login_response["message"])
+                st.error(login_response.get("message", "Invalid OTP."))
 
 
 # ==========================
@@ -98,15 +110,12 @@ def chat_ui():
         else:
             st.caption("No previous chats")
 
-        # -------- Settings Section --------
         with st.expander("Settings"):
-            st.session_state.dark_theme = st.toggle("Dark Theme")
-
             if st.button("Delete All Chats"):
-                    delete_all_chats(user_id)
-                    st.session_state.messages = []
-                    st.session_state.current_chat_id = None
-                    st.rerun()
+                delete_all_chats(user_id)
+                st.session_state.messages = []
+                st.session_state.current_chat_id = None
+                st.rerun()
 
         st.markdown("---")
 
@@ -118,42 +127,20 @@ def chat_ui():
             st.rerun()
 
     # ---------------- Main Area ----------------
-    st.markdown("# Welcome, {}".format(user["name"]))
-    st.markdown("### Your Full Stack Data Science AI Mentor")
+    st.title(f"Welcome, {user['name']}")
+    st.caption("Your Full Stack Data Science AI Mentor")
     st.markdown("---")
 
-    # About section (shown only when no messages yet)
-    if not st.session_state.messages:
-        st.markdown("### Who am I?")
-        st.markdown("""
-I am a domain-focused AI mentor designed to help you with:
-
-- Data Science Roadmaps
-- Machine Learning Concepts
-- Deep Learning Architectures
-- MLOps & Deployment
-- Real-world Project Design
-- Interview Preparation
-""")
-
-        st.markdown("### What can you ask?")
-        st.markdown("""
-- "Give me a full stack DS roadmap"
-- "Explain gradient boosting clearly"
-- "How to deploy ML model on AWS?"
-- "Prepare me for ML interviews"
-""")
-
-    # Initialize chat ID
     if not st.session_state.current_chat_id:
         st.session_state.current_chat_id = str(uuid.uuid4())
 
-    # Display messages
+    if not st.session_state.messages:
+        st.info("Start a new conversation about ML, DL, MLOps or Interviews.")
+
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    # Chat input
     user_input = st.chat_input("Ask your question...")
 
     if user_input:
