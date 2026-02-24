@@ -42,41 +42,59 @@ for key, value in defaults.items():
 # LOGIN PAGE
 # ==========================
 def login_ui():
-    st.title("MLStack Architect")
-    st.caption("Production-Ready Full Stack GenAI System")
-    st.markdown("---")
+    col1, col2 = st.columns([1.3, 1])
 
-    name = st.text_input("Name")
-    email = st.text_input("Email")
+    # ---------------- Left Column ----------------
+    with col1:
+        st.title("MLStack Architect")
+        st.markdown("### Your AI Mentor for Data Science & MLOps ")
 
-    if st.button("Request OTP"):
-        if not name or not email:
-            st.warning("Please enter both name and email.")
-            return
+        st.markdown("""
+        **What You Can Do Here:**
+        - Practice real Machine Learning interview questions
+        - Get structured explanations from beginner to advanced
+        - Continue previous chats anytime
+        - Learn best practices in MLOps and productionizing AI systems
 
-        response = request_otp(name, email)
+        ---
+        🔐 Secure OTP-based authentication  
+        📁 Persistent chat history  
+        ⚡ Production-ready architecture
+        """)
 
-        if response["success"]:
-            st.session_state.otp_sent = True
-            st.success("OTP sent to your email.")
-        else:
-            st.error(response.get("message", "Failed to send OTP."))
+    # ---------------- Right Column ----------------
+    with col2:
+        st.subheader("Login to Continue")
 
-    # Show OTP input only after sending
-    if st.session_state.otp_sent:
-        entered_otp = st.text_input("Enter OTP")
+        name = st.text_input("Full Name")
+        email = st.text_input("Email Address")
 
-        if st.button("Verify"):
-            login_response = verify_otp_and_login(name, email, entered_otp)
+        if st.button("Request OTP"):
+            if not name or not email:
+                st.warning("Please enter both name and email.")
+                return
 
-            if login_response["success"]:
-                st.session_state.authenticated = True
-                st.session_state.user = login_response
-                st.session_state.otp_sent = False
-                st.rerun()
+            response = request_otp(name, email)
+
+            if response["success"]:
+                st.session_state.otp_sent = True
+                st.success("OTP sent to your email.")
             else:
-                st.error(login_response.get("message", "Invalid OTP."))
+                st.error(response.get("message", "Failed to send OTP."))
 
+        if st.session_state.otp_sent:
+            entered_otp = st.text_input("Enter OTP")
+
+            if st.button("Verify & Login"):
+                login_response = verify_otp_and_login(name, email, entered_otp)
+
+                if login_response["success"]:
+                    st.session_state.authenticated = True
+                    st.session_state.user = login_response
+                    st.session_state.otp_sent = False
+                    st.rerun()
+                else:
+                    st.error(login_response.get("message", "Invalid OTP."))
 
 # ==========================
 # CHAT PAGE
